@@ -2,13 +2,12 @@ class Sequella::Plugin::Service
   cattr_accessor :connection
 
   class << self
-
     ##
     # Start the Sequel connection with the configured database
     def start(config)
-      raise "Must supply an adapter argument to the Sequel configuration" if (config.adapter.nil? || config.adapter.empty?)
+      raise "Must supply an adapter argument to the Sequel configuration" if config.adapter.blank?
 
-      params = config.to_hash.select { |k,v| !v.nil? }
+      params = config.to_hash.select { |k, v| !v.nil? }
 
       @@connection = establish_connection params
       require_models(*params.delete(:model_paths))
@@ -55,7 +54,9 @@ class Sequella::Plugin::Service
     #
     # @param params [Hash] Options to establish the database connection
     def establish_connection(params)
-      ::Sequel.connect params
+      connection = ::Sequel.connect params
+      logger.info "Sequella connected to #{params[:adapter].to_s.capitalize} at #{params[:host]}:#{params[:port]}. Database: #{params[:database]}"
+      connection
     end
 
   end # class << self

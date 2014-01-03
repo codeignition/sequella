@@ -7,7 +7,7 @@ describe Sequella::Plugin::Service do
   describe '#start' do
     it 'should raise if start attempted without an adapter specified' do
       config = OpenStruct.new
-      expect { subject.start config }.to raise_error
+      expect { subject.start config }.to raise_error 'Must supply an adapter argument to the Sequel configuration'
     end
   end
 

@@ -7,7 +7,15 @@ describe Sequella::Plugin::Service do
   describe '#start' do
     it 'should raise if start attempted without an adapter specified' do
       config = OpenStruct.new
-      expect { subject.start config }.to raise_error 'Must supply an adapter argument to the Sequel configuration'
+      expect { subject.start config.marshal_dump }.to raise_error 'Must supply an adapter argument to the Sequel configuration'
+    end
+
+    it 'should not raise an error if start attempted with a connection uri specified' do
+      config = OpenStruct.new connection_uri: 'postgres://user:password@localhost/blog'
+      subject.should_receive(:establish_connection).with(config.connection_uri)
+      subject.should_receive(:require_models)
+
+      expect { subject.start config.marshal_dump }.to_not raise_error
     end
   end
 

@@ -5,11 +5,15 @@ class Sequella::Plugin::Service
     ##
     # Start the Sequel connection with the configured database
     def start(config)
-      raise "Must supply an adapter argument to the Sequel configuration" if config.adapter.blank?
-
       params = config.to_hash.select { |k, v| !v.nil? }
+      raise "Must supply an adapter argument to the Sequel configuration" if params[:adapter].blank? and params[:connection_uri].blank?
 
-      @@connection = establish_connection params
+      if params[:connection_uri].blank? # connection_uri, if specified, takes preference
+        @@connection = establish_connection params
+      else
+        @@connection = establish_connection params[:connection_uri]
+      end
+
       require_models(*params.delete(:model_paths))
 
       # Provide Sequel a handle on the Adhearsion logger
@@ -54,9 +58,8 @@ class Sequella::Plugin::Service
     #
     # @param params [Hash] Options to establish the database connection
     def establish_connection(params)
-      connection = ::Sequel.connect params
-      logger.info "Sequella connected to #{params[:adapter].to_s.capitalize} at #{params[:host]}:#{params[:port]}. Database: #{params[:database]}"
-      connection
+      logger.info "Sequella connecting: #{params.inspect}"
+      ::Sequel.connect params
     end
 
   end # class << self

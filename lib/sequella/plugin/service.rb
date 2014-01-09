@@ -6,14 +6,8 @@ class Sequella::Plugin::Service
     # Start the Sequel connection with the configured database
     def start(config)
       params = config.to_hash.select { |k, v| !v.nil? }
-      raise "Must supply an adapter argument to the Sequel configuration" if params[:adapter].blank? and params[:connection_uri].blank?
 
-      if params[:connection_uri].blank? # connection_uri, if specified, takes preference
-        @@connection = establish_connection params
-      else
-        @@connection = establish_connection params[:connection_uri]
-      end
-
+      @@connection = establish_connection connection_string(params)
       require_models(*params.delete(:model_paths))
 
       # Provide Sequel a handle on the Adhearsion logger
@@ -56,10 +50,23 @@ class Sequella::Plugin::Service
     ##
     # Start the Sequel connection with the configured database
     #
+    # @param connection_uri [String] Connection URI for connecting to the database
+    def establish_connection(connection_uri)
+      logger.info "Sequella connecting: #{connection_uri}"
+      ::Sequel.connect connection_uri
+    end
+
+    ##
+    # Construct the database connection string for Sequel
+    #
     # @param params [Hash] Options to establish the database connection
-    def establish_connection(params)
-      logger.info "Sequella connecting: #{params.inspect}"
-      ::Sequel.connect params
+    def connection_string(params)
+      return params[:uri] unless params[:uri].blank?
+
+      raise "Must supply an adapter argument to the Sequel configuration" if params[:adapter].blank?
+
+      adapter_with_prefix = ((RUBY_PLATFORM =~ /java/) ? 'jdbc:' : '') + params[:adapter]
+      "#{adapter_with_prefix}://#{params[:host]}:#{params[:port]}/#{params[:database]}?user=#{params[:username]}&password=#{params[:password]}"
     end
 
   end # class << self

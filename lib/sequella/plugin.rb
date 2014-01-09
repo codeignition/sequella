@@ -11,7 +11,7 @@ class Sequella::Plugin < Adhearsion::Plugin
   # MySQL options are preconfigured. If you want o use another adapter, make sure to include the
   # required options in your configuration file
   config :sequella do
-    connection_uri nil              , :desc => 'raw connection string'
+    uri            ''               , :desc => 'URI to the database instance. Use this or specify each piece of connection information separately below.'
     adapter        'mysql'          , :desc => 'Database adapter. It should be an adapter supported by Sequel'
     database       'test'           , :desc => 'Database name'
     username       'admin'          , :desc => 'valid database username'

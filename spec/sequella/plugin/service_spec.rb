@@ -44,14 +44,14 @@ describe Sequella::Plugin::Service do
         stub_const('RUBY_PLATFORM', 'x86_64-linux')
 
         connection_string = subject.connection_string connection_params
-        expect(connection_string).to eq('postgres://localhost:5432/test?user=test-user&password=password')
+        expect(connection_string).to eq('postgres://test-user:password@localhost:5432/test')
       end
 
       it 'jruby' do
         stub_const('RUBY_PLATFORM', 'java')
 
         connection_string = subject.connection_string connection_params
-        expect(connection_string).to eq('jdbc:postgres://localhost:5432/test?user=test-user&password=password')
+        expect(connection_string).to eq('jdbc:postgres://test-user:password@localhost:5432/test')
       end
     end
   end
